@@ -10,6 +10,14 @@ const example: FastifyPluginAsync = async (fastify): Promise<void> => {
 		}),
 	);
 
+    fastify.get(
+        "/logout",
+        async (request, reply) => {
+            await request.logOut();
+            reply.redirect("http://localhost:9011/oauth2/logout?client_id=3b7c7a1b-8dc6-41cb-afe7-f5ab09375b59");
+        }
+    );
+
 	fastify.get(
 		"/callback",
 		fastifyAuthenticator.authenticate("fusionauth", {
