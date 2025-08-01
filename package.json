@@ -8,7 +8,7 @@
 		"build:ts": "tsc",
 		"watch:ts": "tsc -w",
 		"dev": "npm run build:ts && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"npm:watch:ts\" \"npm:dev:start\"",
-		"dev:start": "fastify start --ignore-watch=.ts$ -w -l info -P dist/app.js"
+		"dev:start": "fastify start --ignore-watch='.ts$ files' -w -l info -P dist/app.js"
 	},
 	"keywords": [],
 	"author": "",
@@ -16,17 +16,23 @@
 	"dependencies": {
 		"@fastify/autoload": "^6.0.0",
 		"@fastify/cookie": "11.0.2",
+		"@fastify/multipart": "9.0.3",
 		"@fastify/passport": "3.0.2",
 		"@fastify/sensible": "^6.0.0",
 		"@fastify/session": "11.1.0",
 		"@fastify/view": "11.1.0",
 		"@fusionauth/typescript-client": "1.58.2",
 		"ejs": "3.1.10",
+		"envalid": "8.1.0",
 		"fastify": "^5.0.0",
 		"fastify-cli": "^7.4.0",
 		"fastify-plugin": "^5.0.0",
+		"google-auth-library": "10.2.0",
+		"googleapis": "154.1.0",
 		"jose": "6.0.12",
-		"passport-oauth2": "1.8.0"
+		"passport-oauth2": "1.8.0",
+		"qs": "6.14.0",
+		"twitter-api-v2": "1.24.0"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.1.3",

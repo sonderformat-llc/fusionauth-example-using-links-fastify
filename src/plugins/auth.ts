@@ -4,6 +4,7 @@ import fastifySession from "@fastify/session";
 import fp from "fastify-plugin";
 import { decodeJwt } from "jose";
 import OAuth2Strategy, { type VerifyCallback } from "passport-oauth2";
+import { env } from "../env";
 
 export const fastifyAuthenticator = new Authenticator();
 
@@ -27,11 +28,18 @@ export default fp(async (fastify) => {
 			sub: string;
 			given_name: string;
 			family_name: string;
+			email: string;
 		},
 		{ id: string; displayName: string }
 	>(async (user) => {
-		const { sub, given_name, family_name } = user;
-		return { id: sub, displayName: `${given_name} ${family_name}` };
+		const { sub, given_name, family_name, email } = user;
+		return {
+			id: sub,
+			displayName:
+				given_name || family_name
+					? `${given_name ?? ""} ${family_name ?? ""}`
+					: email,
+		};
 	});
 
 	fastifyAuthenticator.registerUserDeserializer(async (userFromSession) => {
@@ -42,11 +50,11 @@ export default fp(async (fastify) => {
 		"fusionauth",
 		new OAuth2Strategy(
 			{
-				authorizationURL: "http://localhost:9011/oauth2/authorize",
-				tokenURL: "http://localhost:9011/oauth2/token",
-				clientID: "3b7c7a1b-8dc6-41cb-afe7-f5ab09375b59",
-				clientSecret: "tJqz9LOkpa5ystDXnm_o2yugjLMgKP-zpiJjRetYItY",
-				callbackURL: "http://localhost:3000/auth/callback",
+				authorizationURL: `${env.FUSIONAUTH_URL}/oauth2/authorize`,
+				tokenURL: `${env.FUSIONAUTH_URL}/oauth2/token`,
+				clientID: env.FUSIONAUTH_CLIENT_ID,
+				clientSecret: env.FUSIONAUTH_CLIENT_SECRET,
+				callbackURL: env.FUSIONAUTH_REDIRECT_URI,
 				scope: "openid profile email offline_access",
 				pkce: true,
 				state: true,

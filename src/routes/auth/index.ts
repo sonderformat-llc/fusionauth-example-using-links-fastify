@@ -1,7 +1,8 @@
 import type { FastifyPluginAsync } from "fastify";
+import { env } from "../../env";
 import { fastifyAuthenticator } from "../../plugins/auth";
 
-const example: FastifyPluginAsync = async (fastify): Promise<void> => {
+const auth: FastifyPluginAsync = async (fastify): Promise<void> => {
 	fastify.get(
 		"/login",
 		fastifyAuthenticator.authenticate("fusionauth", {
@@ -10,13 +11,12 @@ const example: FastifyPluginAsync = async (fastify): Promise<void> => {
 		}),
 	);
 
-    fastify.get(
-        "/logout",
-        async (request, reply) => {
-            await request.logOut();
-            reply.redirect("http://localhost:9011/oauth2/logout?client_id=3b7c7a1b-8dc6-41cb-afe7-f5ab09375b59");
-        }
-    );
+	fastify.get("/logout", async (request, reply) => {
+		await request.logOut();
+		reply.redirect(
+			`${env.FUSIONAUTH_URL}/oauth2/logout?client_id=${env.FUSIONAUTH_CLIENT_ID}`,
+		);
+	});
 
 	fastify.get(
 		"/callback",
@@ -28,4 +28,4 @@ const example: FastifyPluginAsync = async (fastify): Promise<void> => {
 	);
 };
 
-export default example;
+export default auth;

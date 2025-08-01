@@ -1,2 +1,192 @@
-<!-- template.ejs: -->
-<p><%= user %></p>
+<style>
+    #drop-zone {
+        cursor: pointer;
+    }
+
+    #drop-zone > * {
+        pointer-events: none;
+    }
+
+    #drop-zone > video {
+        pointer-events: auto;
+        inset: 0;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+</style>
+
+<div class="d-flex flex-column gap-3">
+    <span>
+        Hello <%= user %>!
+    </span>
+
+    <div class="ratio ratio-4x3">
+        <div id="drop-zone" class="rounded border border-primary p-4 text-center">
+            <div>Drag and drop video file</div>
+            <div>or</div>
+            <label for="file-upload" class="btn btn-primary">click to choose file</label>
+            <input type="file" id="file-upload" name="file" class="d-none" accept="video/*"/>
+        </div>
+    </div>
+
+    <div class="progress d-none" id="progress" role="progressbar" aria-label="Basic example" aria-valuenow="0"
+         aria-valuemin="0"
+         aria-valuemax="100">
+        <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+    </div>
+
+    <div class="row row-cols-2 g-3" id="social-media">
+        <% socials.forEach(function(social){ %>
+            <div class="d-flex gap-2">
+                <div class="d-flex flex-column flex-grow-1">
+                    <input type="checkbox" class="btn-check" id="social-media-<%= social.id %>" autocomplete="off"
+                    <% if(social.disabled) { %>
+                           disabled
+                            <% } %>
+                    >
+                    <label class="btn text-start" for="social-media-<%= social.id %>">
+                        <i class="<%= social.icon %>" style="color: <%= social.color %>"></i>
+                        <%= social.name %>
+                    </label>
+                </div>
+                <% if(social.disabled) { %>
+                    <a class="float-end d-flex align-items-center btn btn-outline-info"
+                       title="Do link your account, logout and use the social IdP to login">
+                        <i class="bi bi-link-45deg"></i>
+                    </a>
+                <% } else { %>
+                    <a class="float-end d-flex align-items-center btn btn-outline-info"
+                       href="/socials/unlink/<%= social.id %>" title="Unlink account">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                <% } %>
+            </div>
+        <% }); %>
+    </div>
+
+    <div class="btn btn-primary" id="post-video">
+        Post
+    </div>
+
+    <div class="d-flex justify-content-end">
+        <a href="/auth/logout" class="btn btn-warning">Logout</a>
+    </div>
+</div>
+
+<script>
+    addEventListener('load',
+        () => {
+            const SUPPORTED_TYPES = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'];
+
+            const dropZone = document.getElementById('drop-zone');
+            const fileUpload = document.getElementById('file-upload')
+            const progress = document.getElementById('progress');
+            const progressBar = document.getElementById('progress-bar');
+            const socialMedia = document.getElementById('social-media');
+            const postVideo = document.getElementById('post-video');
+
+            postVideo.addEventListener('click', () => {
+                const socials = [];
+
+                socialMedia.querySelectorAll('input[type="checkbox"]:checked').forEach(input => {
+                    socials.push(input.id.replace('social-media-', ''));
+                })
+
+                fetch('/upload/post', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        socials
+                    })
+                })
+            })
+
+            dropZone.addEventListener('click', () => {
+                fileUpload.click();
+            });
+
+            dropZone.addEventListener('dragenter', (e) => {
+                e.preventDefault();
+
+                if (!e.dataTransfer?.items.length) {
+                    return;
+                }
+
+                const items = Array.from(e.dataTransfer.items);
+
+                if (items.some(item => !SUPPORTED_TYPES.includes(item.type))) {
+                    return;
+                }
+
+                dropZone.classList.add('bg-light');
+            });
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+
+            dropZone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('bg-light');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('bg-light');
+
+                try {
+                    uploadFile(e.dataTransfer.files[0]);
+                } catch (error) {
+                    console.error(error);
+                }
+            });
+
+            fileUpload.addEventListener('change', (e) => {
+                try {
+                    if (fileUpload.files.length === 0) {
+                        return;
+                    }
+                    uploadFile(fileUpload.files[0]);
+                } catch (error) {
+                    console.error(error);
+                    fileUpload.value = '';
+                }
+            });
+
+            function uploadFile(file) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                progress.classList.remove('d-none');
+
+                const xhr = new XMLHttpRequest();
+                xhr.upload.addEventListener('progress', e => {
+                    if (e.lengthComputable) {
+                        const percent = (e.loaded / e.total) * 100;
+                        progressBar.setAttribute('style', 'width: ' + percent + '%');
+                    }
+                });
+
+                xhr.addEventListener('readystatechange', () => {
+                    if (xhr.readyState !== 4) {
+                        return;
+                    }
+                    progress.classList.add('d-none');
+
+                    dropZone.innerHTML = '';
+
+                    const video = document.createElement('video');
+                    video.src = URL.createObjectURL(file);
+                    video.controls = true;
+                    dropZone.appendChild(video);
+
+                    socialMedia.classList.remove('d-none');
+                })
+
+                xhr.open('POST', '/upload');
+                xhr.send(formData);
+            }
+        })
+</script>
