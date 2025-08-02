@@ -26,6 +26,15 @@ const auth: FastifyPluginAsync = async (fastify): Promise<void> => {
 			failWithError: true,
 		}),
 	);
+
+	fastify.get(
+		"/auth/idp/:providerId",
+		fastifyAuthenticator.authenticate("fusionauth", {
+			authInfo: false,
+			successRedirect: "/",
+			failWithError: true,
+		}),
+	);
 };
 
 export default auth;

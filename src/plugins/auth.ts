@@ -8,6 +8,30 @@ import { env } from "../env";
 
 export const fastifyAuthenticator = new Authenticator();
 
+class FusionAuthStrategy extends OAuth2Strategy {
+	// biome-ignore lint/suspicious/noExplicitAny: We need to use any here because the base class doesn't have a type for the options parameter
+	authenticate(req: any, options?: any) {
+		if (req.params?.providerId) {
+			options.idp_hint = req.params.providerId;
+		}
+		super.authenticate(req, options);
+	}
+
+	// biome-ignore lint/suspicious/noExplicitAny: We need to use any here because the base class doesn't have a type for the options parameter
+	authorizationParams(options: any): object {
+		options = options || {};
+		const params = Object.assign({}, options);
+
+		delete params.idp_hint;
+
+		if (options.idp_hint && typeof options.idp_hint === "string") {
+			params.idp_hint = options.idp_hint;
+		}
+
+		return params;
+	}
+}
+
 export default fp(async (fastify) => {
 	fastify.register(fastifyCookie);
 	fastify.register(fastifySession, {
@@ -50,7 +74,7 @@ export default fp(async (fastify) => {
 
 	fastifyAuthenticator.use(
 		"fusionauth",
-		new OAuth2Strategy(
+		new FusionAuthStrategy(
 			{
 				authorizationURL: `${env.FUSIONAUTH_URL}/oauth2/authorize`,
 				tokenURL: `${env.FUSIONAUTH_URL}/oauth2/token`,

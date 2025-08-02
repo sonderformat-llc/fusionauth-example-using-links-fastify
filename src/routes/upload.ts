@@ -45,7 +45,9 @@ const file: FastifyPluginAsync = async (fastify): Promise<void> => {
 		},
 	);
 
-	fastify.post<{ Body: { links: string[]; metadata?: Record<string, any> } }>(
+	fastify.post<{
+		Body: { links: string[]; metadata?: Record<string, object> };
+	}>(
 		"/upload/post",
 		{
 			schema: {
@@ -102,9 +104,7 @@ const file: FastifyPluginAsync = async (fastify): Promise<void> => {
 				});
 			}
 
-			const activeLinks = LINKS.filter((social) =>
-				links.includes(social.id),
-			);
+			const activeLinks = LINKS.filter((social) => links.includes(social.id));
 
 			const promises = activeLinks.map(async (social) => {
 				return await faClient

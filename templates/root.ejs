@@ -99,10 +99,11 @@
                         </label>
                     </div>
                     <% if(link.disabled) { %>
-                        <a class="float-end d-flex align-items-center btn btn-outline-info"
-                           title="Do link your account, logout and use the <%= social.name %> IdP to login">
+                        <button class="float-end d-flex align-items-center btn btn-outline-info"
+                            title="Do link your account, logout and use the <%= link.name %> IdP to login"
+                            @click="link(providerId)">
                             <i class="bi bi-link-45deg"></i>
-                        </a>
+                        </button>
                     <% } else { %>
                         <button class="float-end d-flex align-items-center btn btn-outline-info"
                                 title="Unlink account" @click="unlink(providerId)">
@@ -137,7 +138,7 @@
 
         Alpine.data('video', () => ({
             file: null,
-            links: links.map(link => link.id),
+            links: links.filter(link => !link.disabled).map(link => link.id),
             progress: 0,
             uploading: false,
             uploaded: false,
@@ -222,9 +223,15 @@
                     });
             },
 
+            link(providerId) {
+                if (confirm('Do you want to link your account? You will be logged out and redirected to the IdP to login.')) {
+                    document.location.href = '/links/' + providerId + '/link';
+                }
+            },
+
             unlink(providerId) {
                 if (confirm('Are you sure you want to unlink this account?')) {
-                    document.location.href = '/links/' + providerId + '/unlink/';
+                    document.location.href = '/links/' + providerId + '/unlink';
                 }
             }
         }));
