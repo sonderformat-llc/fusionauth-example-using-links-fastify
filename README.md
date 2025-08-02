@@ -16,7 +16,7 @@ For production mode
 
 ### `npm run test`
 
-Run the test cases.
+[Not Implemented](https://fastify.dev/docs/latest/Guides/Testing/) - Run the test cases.
 
 ## Learn More
 
