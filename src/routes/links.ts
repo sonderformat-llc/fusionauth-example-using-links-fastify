@@ -1,17 +1,13 @@
 import type { FastifyPluginAsync } from "fastify";
-import { env } from "../../env";
-import { faClient } from "../../fusionauth";
+import { env } from "../env";
+import { faClient } from "../fusionauth";
+import { checkAuthenticated } from "../utils";
 
-const socials: FastifyPluginAsync = async (fastify): Promise<void> => {
+const links: FastifyPluginAsync = async (fastify): Promise<void> => {
 	fastify.get<{ Params: { id: string } }>(
-		"/link/:id",
+		"/links/:id/link",
 		{
-			preValidation: (req, res, done) => {
-				if (!req.isAuthenticated()) {
-					res.redirect("/login");
-				}
-				done();
-			},
+			preValidation: checkAuthenticated,
 		},
 		async (req, rep) => {
 			const url = new URL(`${env.FUSIONAUTH_URL}/oauth2/authorize`);
@@ -21,14 +17,27 @@ const socials: FastifyPluginAsync = async (fastify): Promise<void> => {
 			url.searchParams.set("response_type", "code");
 			url.searchParams.set("scope", "openid offline_access");
 
+			// Generate a secure random state with necessary data and store in session
+			const randomBytes = new Uint8Array(16);
+			crypto.getRandomValues(randomBytes);
+			const randomState = Array.from(randomBytes)
+				.map((b) => b.toString(16).padStart(2, "0"))
+				.join("");
+
+			// Store the state in the session for verification when the user returns
+			req.session.set("oauth_state", randomState);
+
+			// Include both the random state and the necessary data
+			const stateData = {
+				c: env.FUSIONAUTH_CLIENT_ID,
+				r: env.FUSIONAUTH_URL,
+				s: randomState, // Random state for verification
+			};
+
+			// Use Buffer for proper encoding instead of btoa
 			url.searchParams.set(
 				"state",
-				btoa(
-					JSON.stringify({
-						c: env.FUSIONAUTH_CLIENT_ID,
-						r: env.FUSIONAUTH_URL,
-					}),
-				),
+				Buffer.from(JSON.stringify(stateData)).toString("base64url"),
 			);
 
 			url.searchParams.set("idp_hint", req.params.id);
@@ -38,14 +47,9 @@ const socials: FastifyPluginAsync = async (fastify): Promise<void> => {
 	);
 
 	fastify.get<{ Params: { id: string } }>(
-		"/unlink/:id",
+		"/links/:id/unlink",
 		{
-			preValidation: (req, res, done) => {
-				if (!req.isAuthenticated()) {
-					res.redirect("/login");
-				}
-				done();
-			},
+			preValidation: checkAuthenticated,
 		},
 		async (req, rep) => {
 			const { id } = req.params;
@@ -72,4 +76,4 @@ const socials: FastifyPluginAsync = async (fastify): Promise<void> => {
 	);
 };
 
-export default socials;
+export default links;

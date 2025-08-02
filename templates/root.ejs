@@ -82,25 +82,25 @@
             </div>
         </div>
 
-        <div class="row row-cols-2 g-3" id="social-media">
-            <% socials.forEach(function(social){ %>
-                <div class="d-flex gap-2" x-data="<%= JSON.stringify(social) %>">
+        <div class="row row-cols-2 g-3" id="link">
+            <% links.forEach(function(link){ %>
+                <div class="d-flex gap-2" x-data="<%= JSON.stringify(link) %>">
                     <div class="d-flex flex-column flex-grow-1">
-                        <input type="checkbox" class="btn-check" id="social-media-<%= social.id %>"
-                               value="<%= social.id %>"
-                               x-model="socials"
-                        <% if(social.disabled) { %>
+                        <input type="checkbox" class="btn-check" id="link-<%= link.id %>"
+                               value="<%= link.id %>"
+                               x-model="links"
+                        <% if(link.disabled) { %>
                                disabled
                                 <% } %>
                         >
-                        <label class="btn text-start" for="social-media-<%= social.id %>">
-                            <i class="<%= social.icon %>" style="color: <%= social.color %>"></i>
-                            <%= social.name %>
+                        <label class="btn text-start" for="link-<%= link.id %>">
+                            <i class="<%= link.icon %>" style="color: <%= link.color %>"></i>
+                            <%= link.name %>
                         </label>
                     </div>
-                    <% if(social.disabled) { %>
+                    <% if(link.disabled) { %>
                         <a class="float-end d-flex align-items-center btn btn-outline-info"
-                           title="Do link your account, logout and use the social IdP to login">
+                           title="Do link your account, logout and use the <%= social.name %> IdP to login">
                             <i class="bi bi-link-45deg"></i>
                         </a>
                     <% } else { %>
@@ -113,7 +113,7 @@
             <% }); %>
         </div>
 
-        <button class="btn btn-primary" id="post-video" :disabled="!uploaded || !socials.length" @click="postFiles">
+        <button class="btn btn-primary" id="post-video" :disabled="!uploaded || !links.length" @click="postFiles">
             Post
         </button>
 
@@ -132,12 +132,12 @@
 
 <script>
     addEventListener('alpine:init', () => {
-        const SUPPORTED_TYPES = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'];
-        const socials = <%- JSON.stringify(socials) %>;
+        const SUPPORTED_TYPES = <%- JSON.stringify(mimeTypes) %>;
+        const links = <%- JSON.stringify(links) %>;
 
         Alpine.data('video', () => ({
             file: null,
-            socials: socials.map(social => social.id),
+            links: links.map(link => link.id),
             progress: 0,
             uploading: false,
             uploaded: false,
@@ -152,6 +152,7 @@
                 this.progress = 0;
                 this.uploading = false;
                 this.uploaded = false;
+                this.posting = false;
             },
 
             selectFile() {
@@ -200,7 +201,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        socials: this.socials
+                        links: this.links
                     })
                 })
                     .then(response => response.json())
@@ -209,19 +210,21 @@
 
                         const results = data.map(link => ({
                             ...link,
-                            name: socials.find(social => social.id === link.id).name,
+                            name: links.find(link => link.id === link.id).name,
                         }));
 
                         this.results = {
                             success: results.filter(link => link.status === 'success'),
                             error: results.filter(link => link.status === 'error'),
                         }
+
+                        this.resetFile();
                     });
             },
 
             unlink(providerId) {
                 if (confirm('Are you sure you want to unlink this account?')) {
-                    document.location.href = '/socials/unlink/' + providerId;
+                    document.location.href = '/links/' + providerId + '/unlink/';
                 }
             }
         }));

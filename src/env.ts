@@ -15,5 +15,9 @@ export const env = cleanEnv(process.env, {
 	GOOGLE_CLIENT_ID: str(),
 	GOOGLE_CLIENT_SECRET: str(),
 
+	SESSION_SECRET: str({
+		default: "this_should_be_at_least_32_chars_long_and_secure_random_string",
+	}),
+
 	PORT: port({ default: 3000 }),
 });

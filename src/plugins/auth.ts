@@ -11,12 +11,14 @@ export const fastifyAuthenticator = new Authenticator();
 export default fp(async (fastify) => {
 	fastify.register(fastifyCookie);
 	fastify.register(fastifySession, {
-		secret: "secret with minimum length of 32 characters",
+		secret: env.SESSION_SECRET,
 		cookieName: "user-session",
 		saveUninitialized: false,
 		cookie: {
-			secure: false,
-			maxAge: 604_800_000,
+			secure: process.env.NODE_ENV === "production", // true in production, false in development
+			httpOnly: true, // Prevents JavaScript access to the cookie
+			sameSite: "lax", // Protects against CSRF attacks
+			maxAge: 604_800_000, // 7 days
 		},
 	});
 
