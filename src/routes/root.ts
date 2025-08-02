@@ -19,7 +19,6 @@ const root: FastifyPluginAsync = async (fastify): Promise<void> => {
 				"",
 				request.user?.id ?? "",
 			);
-            console.log(JSON.stringify(identityProviderLinks, null, 2));
 
 			const socials = SOCIALS.map((social) => ({
 				...social,

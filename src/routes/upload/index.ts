@@ -102,9 +102,25 @@ const file: FastifyPluginAsync = async (fastify): Promise<void> => {
 					});
 			});
 
-			await Promise.allSettled(promises).then((results) => {
-				console.log(JSON.stringify(results, null, 2));
-			});
+			rep.send(
+				await Promise.allSettled(promises).then((results) => {
+					return results.map((result, index) => {
+						if (result.status === "fulfilled") {
+							return {
+								id: activeSocials[index].id,
+								status: "success",
+								url: result.value,
+							};
+						} else {
+							return {
+								id: activeSocials[index].id,
+								status: "error",
+								message: result.reason,
+							};
+						}
+					});
+				}),
+			);
 		},
 	);
 };

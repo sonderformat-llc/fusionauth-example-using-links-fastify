@@ -14,11 +14,6 @@ const socials: FastifyPluginAsync = async (fastify): Promise<void> => {
 			},
 		},
 		async (req, rep) => {
-			const identityProviderLogin = await faClient.retrieveIdentityProvider(
-				"45bb233c-0901-4236-b5ca-ac46e2e0a5a5",
-			);
-			console.log(identityProviderLogin);
-
 			const url = new URL(`${env.FUSIONAUTH_URL}/oauth2/authorize`);
 			url.searchParams.set("client_id", env.FUSIONAUTH_CLIENT_ID);
 
@@ -53,26 +48,26 @@ const socials: FastifyPluginAsync = async (fastify): Promise<void> => {
 			},
 		},
 		async (req, rep) => {
-			const url = new URL("http://localhost:9011/oauth2/authorize");
-			url.searchParams.set("client_id", "1d3c2b11-05bf-46cd-a1e0-84ed965fe782");
+			const { id } = req.params;
 
-			url.searchParams.set("redirect_uri", "/auth/callback");
-			url.searchParams.set("response_type", "code");
-			url.searchParams.set("scope", "openid offline_access");
-
-			url.searchParams.set(
-				"state",
-				btoa(
-					JSON.stringify({
-						c: "1d3c2b11-05bf-46cd-a1e0-84ed965fe782",
-						r: "https://app.fusionauth.io:3443/",
-					}),
-				),
+			const link = await faClient.retrieveUserLinksByUserId(
+				id,
+				req.user?.id ?? "",
 			);
 
-			url.searchParams.set("idp_hint", req.params.id);
+			if (link.response.identityProviderLinks?.length) {
+				const { identityProviderId, identityProviderUserId, userId } =
+					link.response.identityProviderLinks[0];
 
-			return rep.redirect(url.toString());
+				if (identityProviderId && identityProviderUserId && userId) {
+					await faClient.deleteUserLink(
+						identityProviderId,
+						identityProviderUserId,
+						userId,
+					);
+				}
+			}
+			return rep.redirect("/");
 		},
 	);
 };
