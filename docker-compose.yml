@@ -19,7 +19,7 @@ services:
       - db_data:/var/lib/postgresql/data
 
   search:
-    image: opensearchproject/opensearch:2.11.0
+    image: opensearchproject/opensearch:2.19.2
     environment:
       cluster.name: fusionauth
       discovery.type: single-node
@@ -27,6 +27,7 @@ services:
       plugins.security.disabled: true
       bootstrap.memory_lock: true
       OPENSEARCH_JAVA_OPTS: ${OPENSEARCH_JAVA_OPTS}
+      OPENSEARCH_INITIAL_ADMIN_PASSWORD: ${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
     healthcheck:
       interval: 10s
       retries: 80
