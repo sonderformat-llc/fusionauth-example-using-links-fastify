@@ -1,7 +1,6 @@
 import type { FastifyPluginAsync } from "fastify";
-import { env } from "../env";
-import { faClient } from "../fusionauth";
-import { checkAuthenticated } from "../utils";
+
+import { checkAuthenticated, env, faClient } from "../utils";
 
 const links: FastifyPluginAsync = async (fastify): Promise<void> => {
 	fastify.get<{ Params: { id: string } }>(

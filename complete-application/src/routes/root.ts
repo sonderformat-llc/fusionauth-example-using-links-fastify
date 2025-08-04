@@ -1,7 +1,7 @@
 import type { FastifyPluginAsync } from "fastify";
-import { faClient } from "../fusionauth";
+
 import { LINKS } from "../links";
-import { ALLOWED_MIME_TYPES } from "../utils";
+import { ALLOWED_MIME_TYPES, faClient } from "../utils";
 
 const root: FastifyPluginAsync = async (fastify): Promise<void> => {
 	fastify.get("/", async (request, reply) => {

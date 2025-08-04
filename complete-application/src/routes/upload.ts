@@ -2,9 +2,9 @@ import * as fs from "node:fs";
 import { unlink } from "node:fs/promises";
 import { pipeline } from "node:stream/promises";
 import type { FastifyPluginAsync } from "fastify";
-import { faClient } from "../fusionauth";
+
 import { LINKS } from "../links";
-import { ALLOWED_MIME_TYPES, checkAuthenticated } from "../utils";
+import { ALLOWED_MIME_TYPES, checkAuthenticated, faClient } from "../utils";
 
 const file: FastifyPluginAsync = async (fastify): Promise<void> => {
 	fastify.post(

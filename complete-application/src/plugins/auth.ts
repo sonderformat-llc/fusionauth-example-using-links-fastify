@@ -4,7 +4,8 @@ import fastifySession from "@fastify/session";
 import fp from "fastify-plugin";
 import { decodeJwt } from "jose";
 import OAuth2Strategy, { type VerifyCallback } from "passport-oauth2";
-import { env } from "../env";
+
+import { env } from "../utils";
 
 export const fastifyAuthenticator = new Authenticator();
 

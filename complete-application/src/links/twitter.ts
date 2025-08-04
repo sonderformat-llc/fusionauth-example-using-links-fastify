@@ -2,7 +2,8 @@ import https from "node:https";
 import path from "node:path";
 import qs from "qs";
 import TwitterApi, { type TwitterApiTokens } from "twitter-api-v2";
-import { env } from "../env";
+
+import { env } from "../utils";
 import type { LinkDefinition } from "./";
 
 export type TwitterMetadata = {

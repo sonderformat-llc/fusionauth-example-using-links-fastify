@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync } from "fastify";
-import { env } from "../env";
 import { fastifyAuthenticator } from "../plugins/auth";
+
+import { env } from "../utils";
 
 const auth: FastifyPluginAsync = async (fastify): Promise<void> => {
 	fastify.get(

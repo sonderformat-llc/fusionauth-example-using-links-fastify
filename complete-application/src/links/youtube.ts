@@ -2,7 +2,8 @@ import { createReadStream } from "node:fs";
 import path from "node:path";
 import { OAuth2Client } from "google-auth-library";
 import { google } from "googleapis";
-import { env } from "../env";
+
+import { env } from "../utils";
 import type { LinkDefinition } from "./";
 
 export type YouTubeMetadata = {
