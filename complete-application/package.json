@@ -28,7 +28,7 @@
 		"fastify-cli": "^7.4.0",
 		"fastify-plugin": "^5.0.0",
 		"google-auth-library": "10.2.0",
-		"googleapis": "154.1.0",
+		"googleapis": "155.0.1",
 		"jose": "6.0.12",
 		"passport-oauth2": "1.8.0",
 		"qs": "6.14.0",
